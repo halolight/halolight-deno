@@ -15,6 +15,7 @@ export interface JWTPayload {
   avatar: string;
   iat: number; // 签发时间
   exp: number; // 过期时间
+  [key: string]: unknown; // 索引签名以兼容 djwt Payload 类型
 }
 
 /**

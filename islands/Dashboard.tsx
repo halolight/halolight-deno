@@ -325,7 +325,7 @@ function ActivityList({ activities, loading }: ActivityListProps) {
                   activity.type === "order_completed" &&
                     "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400",
                   !["user_login", "document_created", "order_completed"]
-                    .includes(activity.type) &&
+                    .includes(activity.type || "") &&
                     "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
                 )}
               >
@@ -363,14 +363,21 @@ export default function Dashboard(): JSX.Element {
 
   const fetchData = async () => {
     try {
-      const [statsData, visitsData, activitiesData] = await Promise.all([
+      const [statsRes, visitsRes, activitiesRes] = await Promise.all([
         dashboardService.getStats(),
         dashboardService.getVisits(),
         dashboardService.getActivities(),
       ]);
-      setStats(statsData);
-      setVisits(visitsData);
-      setActivities(activitiesData);
+      // 从 ApiResponse 中提取 data 字段
+      if (statsRes.code === 200 && statsRes.data) {
+        setStats(statsRes.data);
+      }
+      if (visitsRes.code === 200 && visitsRes.data) {
+        setVisits(visitsRes.data);
+      }
+      if (activitiesRes.code === 200 && activitiesRes.data) {
+        setActivities(activitiesRes.data);
+      }
     } catch (error) {
       console.error("Failed to fetch dashboard data:", error);
     } finally {

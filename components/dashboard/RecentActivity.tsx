@@ -176,10 +176,10 @@ export function RecentActivity({
           <div
             className={cn(
               "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
-              getActivityColor(activity.type),
+              getActivityColor(activity.type || ""),
             )}
           >
-            {getActivityIcon(activity.type)}
+            {getActivityIcon(activity.type || "")}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm text-gray-900 dark:text-white">

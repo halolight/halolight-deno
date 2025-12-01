@@ -35,7 +35,7 @@ export function useDashboardStats(): UseQueryResult<DashboardStats> {
     setError(null);
     try {
       const response = await dashboardService.getStats();
-      setData(response);
+      setData(response.data);
     } catch (err) {
       setError(err instanceof Error ? err : new Error("获取统计数据失败"));
     } finally {
@@ -67,7 +67,7 @@ export function useDashboardVisits(): UseQueryResult<VisitData[]> {
     setError(null);
     try {
       const response = await dashboardService.getVisits();
-      setData(response);
+      setData(response.data);
     } catch (err) {
       setError(err instanceof Error ? err : new Error("获取访问数据失败"));
     } finally {
@@ -99,7 +99,7 @@ export function useDashboardActivities(): UseQueryResult<Activity[]> {
     setError(null);
     try {
       const response = await dashboardService.getActivities();
-      setData(response);
+      setData(response.data);
     } catch (err) {
       setError(err instanceof Error ? err : new Error("获取活动数据失败"));
     } finally {

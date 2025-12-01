@@ -6,6 +6,7 @@ import { Head } from "$fresh/runtime.ts";
 import { Handlers, PageProps } from "$fresh/server.ts";
 import LoginForm from "../islands/LoginForm.tsx";
 import { getMetaTags } from "../config/tdk.ts";
+import { env } from "../config/index.ts";
 
 interface LoginPageData {
   demoEmail: string;
@@ -15,14 +16,10 @@ interface LoginPageData {
 
 export const handler: Handlers<LoginPageData> = {
   GET(_req, ctx) {
-    const demoEmail = Deno.env.get("DEMO_EMAIL") ?? "";
-    const demoPassword = Deno.env.get("DEMO_PASSWORD") ?? "";
-    const showDemoHint = Deno.env.get("SHOW_DEMO_HINT") === "true";
-
     return ctx.render({
-      demoEmail,
-      demoPassword,
-      showDemoHint,
+      demoEmail: env.demoEmail,
+      demoPassword: env.demoPassword,
+      showDemoHint: env.showDemoHint,
     });
   },
 };

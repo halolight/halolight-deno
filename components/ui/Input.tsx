@@ -1,14 +1,14 @@
 import { JSX } from "preact";
 import { forwardRef } from "preact/compat";
-import { useState } from "preact/hooks";
 
-interface InputProps
-  extends Omit<JSX.HTMLAttributes<HTMLInputElement>, "size"> {
+export interface InputProps
+  extends Omit<JSX.HTMLAttributes<HTMLInputElement>, "size" | "state"> {
   label?: string;
   error?: string;
   helperText?: string;
   variant?: "default" | "floating";
   size?: "sm" | "md" | "lg";
+  state?: "default" | "error" | "success";
   type?: string;
 }
 
@@ -23,10 +23,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({
   value,
   ...props
 }, ref) => {
-  const [hasValue, setHasValue] = useState(!!value);
-
   const baseClasses =
-    "w-full border rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed";
+    "w-full border rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed bg-white dark:bg-gray-800 text-gray-900 dark:text-white";
 
   const sizeClasses = {
     sm: "px-3 py-1.5 text-sm",
@@ -42,29 +40,20 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({
     sizeClasses[size]
   } ${errorClasses} ${className}`;
 
-  const handleChange = (e: JSX.TargetedEvent<HTMLInputElement>) => {
-    const target = e.target as HTMLInputElement;
-    setHasValue(!!target.value);
-    if (props.onChange) {
-      props.onChange(e);
-    }
-  };
-
+  // 浮动标签变体 - 使用 CSS :placeholder-shown 检测值
   if (variant === "floating") {
     return (
-      <div
-        className={`input-custom input-floating ${hasValue ? "has-value" : ""}`}
-      >
+      <div className="input-custom input-floating relative">
         <input
           ref={ref}
           type={type}
-          className={classes}
+          className={`${classes} peer placeholder-transparent pt-6 pb-2`}
           value={value}
-          onChange={handleChange}
+          placeholder={label || " "}
           {...props}
         />
         {label && (
-          <label className="floating-label">
+          <label className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 transition-all duration-200 peer-focus:top-2 peer-focus:text-xs peer-focus:text-blue-500 peer-[:not(:placeholder-shown)]:top-2 peer-[:not(:placeholder-shown)]:text-xs pointer-events-none">
             {label}
           </label>
         )}
@@ -94,7 +83,6 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({
         type={type}
         className={classes}
         value={value}
-        onChange={handleChange}
         {...props}
       />
       {error && (

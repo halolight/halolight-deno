@@ -1,24 +1,43 @@
+/**
+ * LayoutManager - 布局管理器 (Island)
+ * 管理侧边栏折叠状态、移动端菜单、搜索对话框等
+ */
 import { useEffect, useState } from "preact/hooks";
 import { JSX } from "preact";
 import Header from "../components/layout/Header.tsx";
-import Sidebar from "../components/layout/Sidebar.tsx";
+import SidebarIsland from "./SidebarIsland.tsx";
+import CommandMenuIsland from "./CommandMenuIsland.tsx";
+import { AdminFooter } from "../components/layout/Footer.tsx";
 
 interface LayoutManagerProps {
   children: JSX.Element | JSX.Element[] | string;
   title?: string;
   showSidebar?: boolean;
+  showHeader?: boolean;
+  showFooter?: boolean;
 }
 
-const LayoutManager = (
-  { children, title, showSidebar = true }: LayoutManagerProps,
-) => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [sidebarVisible, setSidebarVisible] = useState(showSidebar);
+const SIDEBAR_COLLAPSED_KEY = "sidebar-collapsed";
+const EXPANDED_WIDTH = 220;
+const COLLAPSED_WIDTH = 72;
+
+const LayoutManager = ({
+  children,
+  title,
+  showSidebar = true,
+  showHeader = true,
+  showFooter = true,
+}: LayoutManagerProps) => {
+  // 侧边栏状态
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isLargeScreen, setIsLargeScreen] = useState(true);
+
+  // 搜索对话框状态
+  const [searchOpen, setSearchOpen] = useState(false);
 
   // 初始化主题
   useEffect(() => {
-    // 初始化主题逻辑
     const initTheme = () => {
       const savedTheme = localStorage.getItem("theme-storage");
       if (savedTheme) {
@@ -49,19 +68,27 @@ const LayoutManager = (
     initTheme();
   }, []);
 
-  // 检测屏幕尺寸和侧边栏状态
+  // 从 localStorage 恢复侧边栏状态
+  useEffect(() => {
+    const saved = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
+    if (saved !== null) {
+      setSidebarCollapsed(saved === "true");
+    }
+  }, []);
+
+  // 保存侧边栏状态到 localStorage
+  useEffect(() => {
+    localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(sidebarCollapsed));
+  }, [sidebarCollapsed]);
+
+  // 检测屏幕尺寸
   useEffect(() => {
     const checkScreenSize = () => {
-      const isLarge = globalThis.innerWidth >= 1024; // lg断点
+      const isLarge = globalThis.innerWidth >= 1024;
       setIsLargeScreen(isLarge);
 
       if (isLarge) {
-        // 大屏幕下，侧边栏默认显示，但可以通过sidebarVisible控制
-        setSidebarOpen(false); // 重置移动端状态
-      } else {
-        // 小屏幕下，侧边栏默认隐藏
-        setSidebarVisible(true); // 小屏幕下总是显示切换按钮
-        setSidebarOpen(false);
+        setMobileMenuOpen(false);
       }
     };
 
@@ -70,51 +97,91 @@ const LayoutManager = (
     return () => globalThis.removeEventListener("resize", checkScreenSize);
   }, []);
 
-  const toggleSidebar = () => {
+  // 键盘快捷键处理
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Cmd/Ctrl + K 打开搜索
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+      // Cmd/Ctrl + B 切换侧边栏
+      if ((e.metaKey || e.ctrlKey) && e.key === "b") {
+        e.preventDefault();
+        if (isLargeScreen) {
+          setSidebarCollapsed(!sidebarCollapsed);
+        } else {
+          setMobileMenuOpen(!mobileMenuOpen);
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isLargeScreen, sidebarCollapsed, mobileMenuOpen]);
+
+  const handleMenuClick = () => {
     if (isLargeScreen) {
-      // 大屏幕下切换侧边栏显示/隐藏
-      setSidebarVisible(!sidebarVisible);
+      setSidebarCollapsed(!sidebarCollapsed);
     } else {
-      // 小屏幕下切换移动端侧边栏
-      setSidebarOpen(!sidebarOpen);
+      setMobileMenuOpen(!mobileMenuOpen);
     }
   };
 
-  const closeSidebar = () => {
-    setSidebarOpen(false);
+  const handleSearchClick = () => {
+    setSearchOpen(true);
   };
+
+  const sidebarWidth = showSidebar
+    ? (sidebarCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH)
+    : 0;
 
   return (
     <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
-      {/* 固定头部 */}
-      <Header
-        title={title}
-        showSidebarToggle
-        onSidebarToggle={toggleSidebar}
-        className="flex-shrink-0"
-      />
+      {/* 搜索对话框 */}
+      <CommandMenuIsland open={searchOpen} onOpenChange={setSearchOpen} />
 
-      {/* 中间内容区域 - 可滚动 */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* 侧边栏 */}
-        {sidebarVisible && (
-          <Sidebar
-            isOpen={sidebarOpen}
-            onClose={closeSidebar}
+      {/* 侧边栏 */}
+      {showSidebar && (
+        <SidebarIsland
+          collapsed={sidebarCollapsed}
+          onCollapsedChange={setSidebarCollapsed}
+          mobileOpen={mobileMenuOpen}
+          onMobileClose={() => setMobileMenuOpen(false)}
+          expandedWidth={EXPANDED_WIDTH}
+          collapsedWidth={COLLAPSED_WIDTH}
+        />
+      )}
+
+      {/* 主内容区域 */}
+      <div
+        className="flex-1 flex flex-col transition-all duration-200 ease-in-out"
+        style={{
+          marginLeft: isLargeScreen && showSidebar ? `${sidebarWidth}px` : 0,
+        }}
+      >
+        {/* 头部 */}
+        {showHeader && (
+          <Header
+            title={title}
+            showSidebarToggle={showSidebar}
+            onSidebarToggle={handleMenuClick}
+            onSearchClick={handleSearchClick}
+            showSearch
+            showNotifications
+            showErrors
+            showQuickSettings
+            showUserMenu
           />
         )}
 
-        {/* 主内容区域 - 可滚动 */}
-        <main className="flex-1 overflow-y-auto transition-all duration-300 ease-in-out">
-          <div
-            className={`
-            py-6 px-4 md:px-6 min-h-full transition-all duration-300 ease-in-out
-            ${sidebarVisible ? "lg:pl-6 lg:pr-6" : ""}
-            max-w-none w-full
-          `}
-          >
+        {/* 主内容 - 可滚动 */}
+        <main className="flex-1 overflow-y-auto flex flex-col">
+          <div className="flex-1 py-6 px-4 md:px-6">
             {children}
           </div>
+          {/* 页脚 - 在滚动区域内，但始终在内容底部 */}
+          {showFooter && <AdminFooter className="mt-auto flex-shrink-0" />}
         </main>
       </div>
     </div>

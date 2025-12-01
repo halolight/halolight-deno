@@ -83,9 +83,11 @@ export type UserStatus = "active" | "inactive" | "suspended";
 export interface User {
   id: string;
   name: string;
+  username?: string;
   email: string;
   phone?: string;
   avatar?: string;
+  profileUrl?: string;
   role: Role;
   status: UserStatus;
   department?: string;
@@ -213,14 +215,22 @@ export interface Order {
   createdAt: string;
 }
 
+/** 活动类型 */
+export type ActivityType =
+  | "user_login"
+  | "document_created"
+  | "order_completed"
+  | "message_received";
+
 /** 活动记录 */
 export interface Activity {
   id: string;
   user: string;
-  avatar: string;
+  avatar?: string;
   action: string;
-  target: string;
+  target?: string;
   time: string;
+  type?: ActivityType;
 }
 
 /** 系统概览 */

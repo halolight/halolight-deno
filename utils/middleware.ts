@@ -15,6 +15,12 @@ import type { AppUser } from "./auth.ts";
 export interface AuthContext {
   isAuthenticated: boolean;
   user: Partial<AppUser> | null;
+  isAdmin?: boolean;
+}
+
+// 扩展 Fresh 状态类型
+export interface AuthState {
+  auth?: AuthContext;
 }
 
 /**
@@ -180,19 +186,22 @@ export async function getAuthContext(req: Request): Promise<AuthContext> {
  * 从上下文中获取当前用户
  */
 export function getCurrentUser(ctx: HandlerContext): Partial<AppUser> | null {
-  return ctx.state.auth?.user || null;
+  const state = ctx.state as AuthState;
+  return state.auth?.user || null;
 }
 
 /**
  * 检查当前用户是否已登录
  */
 export function isAuthenticated(ctx: HandlerContext): boolean {
-  return ctx.state.auth?.isAuthenticated || false;
+  const state = ctx.state as AuthState;
+  return state.auth?.isAuthenticated || false;
 }
 
 /**
  * 检查当前用户是否是管理员
  */
 export function isAdmin(ctx: HandlerContext): boolean {
-  return ctx.state.auth?.isAdmin || false;
+  const state = ctx.state as AuthState;
+  return state.auth?.isAdmin || false;
 }

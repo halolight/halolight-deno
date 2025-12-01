@@ -89,3 +89,77 @@ export {
   type TooltipPlacement,
   type TooltipProps,
 } from "./Tooltip.tsx";
+
+// 新增组件
+export {
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+  default as AlertDialogRoot,
+} from "./AlertDialog.tsx";
+
+export {
+  default as Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "./Sheet.tsx";
+
+export {
+  default as Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "./Popover.tsx";
+
+export {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+  CommandShortcut,
+  default as Command,
+} from "./Command.tsx";
+
+export {
+  BackToTop,
+  BackToTopSimple,
+  default as BackToTopDefault,
+} from "./BackToTop.tsx";
+
+export {
+  type CookieConsentValue,
+  default as CookieConsent,
+  getCookieConsent,
+  resetCookieConsent,
+} from "./CookieConsent.tsx";
+
+export {
+  ContextMenuCheckboxItem,
+  ContextMenuContent,
+  ContextMenuGroup,
+  ContextMenuItem,
+  ContextMenuLabel,
+  ContextMenuRadioGroup,
+  ContextMenuRadioItem,
+  ContextMenuSeparator,
+  ContextMenuShortcut,
+  ContextMenuSub,
+  ContextMenuSubContent,
+  ContextMenuSubTrigger,
+  ContextMenuTrigger,
+  default as ContextMenuRoot,
+} from "./ContextMenu.tsx";
+
+export { default as InputClear } from "./InputClear.tsx";

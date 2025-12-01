@@ -3,7 +3,7 @@
  * 复选框组件
  */
 
-import type { JSX } from "preact";
+import type { ComponentChildren, JSX } from "preact";
 import { cn } from "../../lib/utils.ts";
 
 // ============================================================================
@@ -28,7 +28,7 @@ export interface CheckboxProps {
   /** 自定义类名 */
   className?: string;
   /** 标签 */
-  label?: string;
+  label?: ComponentChildren;
   /** 描述 */
   description?: string;
   /** 不确定状态 */

@@ -5,7 +5,7 @@
 
 import { useCallback, useEffect, useState } from "preact/hooks";
 import { calendarService } from "../lib/api/services.ts";
-import type { CalendarEvent } from "../lib/api/types.ts";
+import type { CalendarEvent, CalendarEventType } from "../lib/api/types.ts";
 
 // ============================================================================
 // 类型定义
@@ -18,7 +18,7 @@ export interface CalendarEventFormData {
   allDay?: boolean;
   description?: string;
   color?: string;
-  type?: string;
+  type?: CalendarEventType;
 }
 
 interface UseCalendarEventsResult {
@@ -61,9 +61,10 @@ export function useCalendarEvents(
     setError(null);
     try {
       const response = await calendarService.getEvents();
+      const events = response.data;
       // 如果有时间范围，过滤事件
       if (start || end) {
-        const filtered = response.filter((event) => {
+        const filtered = events.filter((event: CalendarEvent) => {
           const eventStart = new Date(event.start);
           const eventEnd = new Date(event.end);
           const rangeStart = start ? new Date(start) : null;
@@ -75,7 +76,7 @@ export function useCalendarEvents(
         });
         setData(filtered);
       } else {
-        setData(response);
+        setData(events);
       }
     } catch (err) {
       setError(err instanceof Error ? err : new Error("获取日历事件失败"));
@@ -106,8 +107,9 @@ export function useCalendarEvent(
     setLoading(true);
     setError(null);
     try {
-      const events = await calendarService.getEvents();
-      const event = events.find((e) => e.id === id) || null;
+      const response = await calendarService.getEvents();
+      const events = response.data;
+      const event = events.find((e: CalendarEvent) => e.id === id) || null;
       setData(event);
     } catch (err) {
       setError(err instanceof Error ? err : new Error("获取日历事件失败"));
@@ -142,7 +144,9 @@ export function useCreateCalendarEvent(options?: {
     setError(null);
     try {
       const result = await calendarService.createEvent(formData);
-      options?.onSuccess?.(result);
+      if (result.data) {
+        options?.onSuccess?.(result.data);
+      }
     } catch (err) {
       const error = err instanceof Error ? err : new Error("创建日历事件失败");
       setError(error);
@@ -173,7 +177,9 @@ export function useUpdateCalendarEvent(options?: {
       setError(null);
       try {
         const result = await calendarService.updateEvent(id, data);
-        options?.onSuccess?.(result);
+        if (result.data) {
+          options?.onSuccess?.(result.data);
+        }
       } catch (err) {
         const error = err instanceof Error
           ? err
@@ -232,7 +238,8 @@ export function useBatchDeleteCalendarEvents(options?: {
     setLoading(true);
     setError(null);
     try {
-      await calendarService.batchDeleteEvents(ids);
+      // 批量删除事件（逐个删除）
+      await Promise.all(ids.map((id) => calendarService.deleteEvent(id)));
       options?.onSuccess?.(ids);
     } catch (err) {
       const error = err instanceof Error

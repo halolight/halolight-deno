@@ -1,19 +1,24 @@
-import { JSX } from "preact";
+import type { ComponentChildren, JSX } from "preact";
 import { forwardRef } from "preact/compat";
 
-interface ButtonProps
+export type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "outline"
+  | "ghost"
+  | "gradient"
+  | "glass"
+  | "danger";
+
+export type ButtonSize = "sm" | "md" | "lg";
+
+export interface ButtonProps
   extends Omit<JSX.HTMLAttributes<HTMLButtonElement>, "size" | "loading"> {
-  variant?:
-    | "primary"
-    | "secondary"
-    | "outline"
-    | "ghost"
-    | "gradient"
-    | "glass";
-  size?: "sm" | "md" | "lg";
+  variant?: ButtonVariant;
+  size?: ButtonSize;
   loading?: boolean;
   disabled?: boolean;
-  children: JSX.Element | string;
+  children: ComponentChildren;
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
@@ -37,6 +42,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
       "text-blue-600 hover:bg-blue-50 active:bg-blue-100 dark:hover:bg-blue-900/20 dark:active:bg-blue-900/30",
     gradient: "btn-custom btn-gradient",
     glass: "btn-custom btn-glass",
+    danger: "bg-red-600 text-white hover:bg-red-700 active:bg-red-800",
   };
 
   const sizeClasses = {

@@ -12,12 +12,14 @@ import { cn } from "../../lib/utils.ts";
 
 export type BadgeVariant =
   | "default"
+  | "primary"
   | "secondary"
   | "destructive"
   | "outline"
   | "success"
   | "warning"
-  | "info";
+  | "info"
+  | "error";
 
 export interface BadgeProps {
   /** 内容 */
@@ -40,6 +42,7 @@ export interface BadgeProps {
 
 const variantClasses: Record<BadgeVariant, string> = {
   default: "bg-primary-500 text-white border-transparent",
+  primary: "bg-blue-500 text-white border-transparent",
   secondary:
     "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border-transparent",
   destructive: "bg-red-500 text-white border-transparent",
@@ -48,6 +51,7 @@ const variantClasses: Record<BadgeVariant, string> = {
   success: "bg-green-500 text-white border-transparent",
   warning: "bg-yellow-500 text-white border-transparent",
   info: "bg-blue-500 text-white border-transparent",
+  error: "bg-red-500 text-white border-transparent",
 };
 
 const sizeClasses = {

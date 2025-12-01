@@ -29,6 +29,7 @@ import type {
   User,
   UserCreateRequest,
   UserFilterParams,
+  UserStatus,
   UserUpdateRequest,
   VisitData,
 } from "./types.ts";
@@ -216,6 +217,44 @@ export const userService = {
       code: 200,
       message: "删除成功",
       data: null,
+    };
+  },
+
+  /** 批量删除用户 */
+  batchDeleteUsers: async (ids: string[]): Promise<ApiResponse<null>> => {
+    await delay(500);
+    ids.forEach((id) => {
+      const index = mockUsers.findIndex((u) => u.id === id);
+      if (index !== -1) {
+        mockUsers.splice(index, 1);
+      }
+    });
+    return {
+      code: 200,
+      message: "批量删除成功",
+      data: null,
+    };
+  },
+
+  /** 更新用户状态 */
+  updateUserStatus: async (
+    id: string,
+    status: UserStatus,
+  ): Promise<ApiResponse<User | null>> => {
+    await delay(500);
+    const user = mockUsers.find((u) => u.id === id);
+    if (!user) {
+      return {
+        code: 404,
+        message: "用户不存在",
+        data: null,
+      };
+    }
+    user.status = status;
+    return {
+      code: 200,
+      message: "状态更新成功",
+      data: user,
     };
   },
 };

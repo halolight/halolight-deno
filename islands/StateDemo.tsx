@@ -1,10 +1,24 @@
+/**
+ * StateDemo Island 组件
+ * 状态管理演示的客户端交互组件
+ */
+
+import { IS_BROWSER } from "$fresh/runtime.ts";
+import { useEffect, useState } from "preact/hooks";
 import Button from "../components/ui/Button.tsx";
 import Card, {
   CardContent,
   CardHeader,
   CardTitle,
 } from "../components/ui/Card.tsx";
-import { useAppStore, useThemeStore, useUserStore } from "../stores/index.ts";
+
+// 用户类型定义
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
 
 export default function StateDemo() {
   return (
@@ -26,15 +40,58 @@ export default function StateDemo() {
 
 // 应用状态演示
 function AppStateDemo() {
-  const {
-    isLoading,
-    error,
-    sidebarOpen,
-    setLoading,
-    setError,
-    toggleSidebar,
-    setSidebarOpen,
-  } = useAppStore();
+  // 客户端状态 - 避免 SSR 时调用 Zustand
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // 客户端初始化 store 订阅
+  useEffect(() => {
+    if (!IS_BROWSER) return;
+
+    const initStore = async () => {
+      const { useAppStore } = await import("../stores/useAppStore.ts");
+
+      const unsubscribe = useAppStore.subscribe((state) => {
+        setIsLoading(state.isLoading);
+        setError(state.error);
+        setSidebarOpen(state.sidebarOpen);
+      });
+
+      const state = useAppStore.getState();
+      setIsLoading(state.isLoading);
+      setError(state.error);
+      setSidebarOpen(state.sidebarOpen);
+
+      return unsubscribe;
+    };
+
+    initStore();
+  }, []);
+
+  const handleSetLoading = async (value: boolean) => {
+    if (!IS_BROWSER) return;
+    const { useAppStore } = await import("../stores/useAppStore.ts");
+    useAppStore.getState().setLoading(value);
+  };
+
+  const handleSetError = async (value: string | null) => {
+    if (!IS_BROWSER) return;
+    const { useAppStore } = await import("../stores/useAppStore.ts");
+    useAppStore.getState().setError(value);
+  };
+
+  const handleToggleSidebar = async () => {
+    if (!IS_BROWSER) return;
+    const { useAppStore } = await import("../stores/useAppStore.ts");
+    useAppStore.getState().toggleSidebar();
+  };
+
+  const handleSetSidebarOpen = async (value: boolean) => {
+    if (!IS_BROWSER) return;
+    const { useAppStore } = await import("../stores/useAppStore.ts");
+    useAppStore.getState().setSidebarOpen(value);
+  };
 
   return (
     <Card>
@@ -50,7 +107,7 @@ function AppStateDemo() {
                 <Button
                   size="sm"
                   variant={isLoading ? "primary" : "outline"}
-                  onClick={() => setLoading(!isLoading)}
+                  onClick={() => handleSetLoading(!isLoading)}
                 >
                   {isLoading ? "停止加载" : "开始加载"}
                 </Button>
@@ -60,20 +117,20 @@ function AppStateDemo() {
             <div className="flex items-center justify-between">
               <span className="text-sm">侧边栏:</span>
               <div className="flex gap-2">
-                <Button size="sm" onClick={toggleSidebar}>
+                <Button size="sm" onClick={handleToggleSidebar}>
                   切换
                 </Button>
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => setSidebarOpen(true)}
+                  onClick={() => handleSetSidebarOpen(true)}
                 >
                   打开
                 </Button>
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => setSidebarOpen(false)}
+                  onClick={() => handleSetSidebarOpen(false)}
                 >
                   关闭
                 </Button>
@@ -86,14 +143,14 @@ function AppStateDemo() {
                 <Button
                   size="sm"
                   variant="secondary"
-                  onClick={() => setError("这是一个测试错误")}
+                  onClick={() => handleSetError("这是一个测试错误")}
                 >
                   设置错误
                 </Button>
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => setError(null)}
+                  onClick={() => handleSetError(null)}
                 >
                   清除错误
                 </Button>
@@ -114,7 +171,45 @@ function AppStateDemo() {
 
 // 主题状态演示
 function ThemeStateDemo() {
-  const { theme, isDark, setTheme, toggleTheme } = useThemeStore();
+  // 客户端状态 - 避免 SSR 时调用 Zustand
+  const [theme, setThemeState] = useState<"light" | "dark" | "system">(
+    "system",
+  );
+  const [isDark, setIsDark] = useState(false);
+
+  // 客户端初始化 store 订阅
+  useEffect(() => {
+    if (!IS_BROWSER) return;
+
+    const initStore = async () => {
+      const { useThemeStore } = await import("../stores/useThemeStore.ts");
+
+      const unsubscribe = useThemeStore.subscribe((state) => {
+        setThemeState(state.theme);
+        setIsDark(state.isDark);
+      });
+
+      const state = useThemeStore.getState();
+      setThemeState(state.theme);
+      setIsDark(state.isDark);
+
+      return unsubscribe;
+    };
+
+    initStore();
+  }, []);
+
+  const handleSetTheme = async (value: "light" | "dark" | "system") => {
+    if (!IS_BROWSER) return;
+    const { useThemeStore } = await import("../stores/useThemeStore.ts");
+    useThemeStore.getState().setTheme(value);
+  };
+
+  const handleToggleTheme = async () => {
+    if (!IS_BROWSER) return;
+    const { useThemeStore } = await import("../stores/useThemeStore.ts");
+    useThemeStore.getState().toggleTheme();
+  };
 
   return (
     <Card>
@@ -135,27 +230,27 @@ function ThemeStateDemo() {
               <Button
                 size="sm"
                 variant={theme === "light" ? "primary" : "outline"}
-                onClick={() => setTheme("light")}
+                onClick={() => handleSetTheme("light")}
               >
                 亮色
               </Button>
               <Button
                 size="sm"
                 variant={theme === "dark" ? "primary" : "outline"}
-                onClick={() => setTheme("dark")}
+                onClick={() => handleSetTheme("dark")}
               >
                 暗色
               </Button>
               <Button
                 size="sm"
                 variant={theme === "system" ? "primary" : "outline"}
-                onClick={() => setTheme("system")}
+                onClick={() => handleSetTheme("system")}
               >
                 系统
               </Button>
             </div>
 
-            <Button size="sm" variant="secondary" onClick={toggleTheme}>
+            <Button size="sm" variant="secondary" onClick={handleToggleTheme}>
               快速切换
             </Button>
           </div>
@@ -173,16 +268,36 @@ function ThemeStateDemo() {
 
 // 用户状态演示
 function UserStateDemo() {
-  const {
-    user,
-    isAuthenticated,
-    login,
-    logout,
-    updateUser,
-  } = useUserStore();
+  // 客户端状态 - 避免 SSR 时调用 Zustand
+  const [user, setUser] = useState<User | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const handleLogin = () => {
-    login({
+  // 客户端初始化 store 订阅
+  useEffect(() => {
+    if (!IS_BROWSER) return;
+
+    const initStore = async () => {
+      const { useUserStore } = await import("../stores/useUserStore.ts");
+
+      const unsubscribe = useUserStore.subscribe((state) => {
+        setUser(state.user);
+        setIsAuthenticated(state.isAuthenticated);
+      });
+
+      const state = useUserStore.getState();
+      setUser(state.user);
+      setIsAuthenticated(state.isAuthenticated);
+
+      return unsubscribe;
+    };
+
+    initStore();
+  }, []);
+
+  const handleLogin = async () => {
+    if (!IS_BROWSER) return;
+    const { useUserStore } = await import("../stores/useUserStore.ts");
+    useUserStore.getState().login({
       id: "1",
       name: "张三",
       email: "zhangsan@example.com",
@@ -190,10 +305,16 @@ function UserStateDemo() {
     });
   };
 
-  const handleUpdateName = () => {
-    if (user) {
-      updateUser({ name: "李四" });
-    }
+  const handleLogout = async () => {
+    if (!IS_BROWSER) return;
+    const { useUserStore } = await import("../stores/useUserStore.ts");
+    useUserStore.getState().logout();
+  };
+
+  const handleUpdateName = async () => {
+    if (!IS_BROWSER || !user) return;
+    const { useUserStore } = await import("../stores/useUserStore.ts");
+    useUserStore.getState().updateUser({ name: "李四" });
   };
 
   return (
@@ -233,7 +354,11 @@ function UserStateDemo() {
                     >
                       更新姓名
                     </Button>
-                    <Button size="sm" variant="secondary" onClick={logout}>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={handleLogout}
+                    >
                       退出登录
                     </Button>
                   </>
@@ -261,6 +386,12 @@ function UserStateDemo() {
 
 // 状态持久化演示
 function PersistenceDemo() {
+  const handleClearStorage = () => {
+    if (!IS_BROWSER) return;
+    localStorage.clear();
+    globalThis.location.reload();
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -289,18 +420,11 @@ function PersistenceDemo() {
 
           <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
             <p className="text-sm text-blue-800 dark:text-blue-200">
-              💡 刷新页面或重新打开浏览器，这些状态都会被保持。
+              刷新页面或重新打开浏览器，这些状态都会被保持。
             </p>
           </div>
 
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => {
-              localStorage.clear();
-              globalThis.location.reload();
-            }}
-          >
+          <Button size="sm" variant="outline" onClick={handleClearStorage}>
             清除所有本地数据
           </Button>
         </div>

@@ -24,7 +24,7 @@ export function uuid(): string {
 }
 
 /** 从数组中随机选择 */
-export function pick<T>(arr: T[]): T {
+export function pick<T>(arr: readonly T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 

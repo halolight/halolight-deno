@@ -5,32 +5,26 @@
 
 import { useCallback, useEffect, useState } from "preact/hooks";
 import { userService } from "../lib/api/services.ts";
-import type { PaginatedResponse, User, UserStatus } from "../lib/api/types.ts";
+import type {
+  User,
+  UserCreateRequest,
+  UserFilterParams,
+  UserStatus,
+} from "../lib/api/types.ts";
 
 // ============================================================================
 // 类型定义
 // ============================================================================
 
-export interface UserQueryParams {
-  page?: number;
-  pageSize?: number;
-  search?: string;
-  status?: string;
-  role?: string;
-}
+export type UserQueryParams = UserFilterParams;
 
-export interface UserFormData {
-  name: string;
-  email: string;
-  role?: string;
-  status?: UserStatus;
-  avatar?: string;
-  phone?: string;
-  department?: string;
-}
+export type UserFormData = UserCreateRequest;
 
 interface UseUsersResult {
-  data: PaginatedResponse<User> | null;
+  data: User[] | null;
+  total: number;
+  page: number;
+  pageSize: number;
   loading: boolean;
   error: Error | null;
   refetch: () => Promise<void>;
@@ -57,7 +51,10 @@ interface MutationResult<T> {
  * 获取用户列表
  */
 export function useUsers(params?: UserQueryParams): UseUsersResult {
-  const [data, setData] = useState<PaginatedResponse<User> | null>(null);
+  const [data, setData] = useState<User[] | null>(null);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -66,7 +63,10 @@ export function useUsers(params?: UserQueryParams): UseUsersResult {
     setError(null);
     try {
       const response = await userService.getUsers(params);
-      setData(response);
+      setData(response.data.list);
+      setTotal(response.data.total);
+      setPage(response.data.page);
+      setPageSize(response.data.pageSize);
     } catch (err) {
       setError(err instanceof Error ? err : new Error("获取用户列表失败"));
     } finally {
@@ -78,7 +78,7 @@ export function useUsers(params?: UserQueryParams): UseUsersResult {
     fetchUsers();
   }, [fetchUsers]);
 
-  return { data, loading, error, refetch: fetchUsers };
+  return { data, total, page, pageSize, loading, error, refetch: fetchUsers };
 }
 
 /**
@@ -95,7 +95,7 @@ export function useUser(id: string | undefined): UseUserResult {
     setError(null);
     try {
       const response = await userService.getUser(id);
-      setData(response);
+      setData(response.data || null);
     } catch (err) {
       setError(err instanceof Error ? err : new Error("获取用户详情失败"));
     } finally {
@@ -118,7 +118,7 @@ export function useUser(id: string | undefined): UseUserResult {
  * 创建用户
  */
 export function useCreateUser(options?: {
-  onSuccess?: (data: User) => void;
+  onSuccess?: (data: { id: string; createdAt: string }) => void;
   onError?: (error: Error) => void;
 }): MutationResult<UserFormData> {
   const [loading, setLoading] = useState(false);
@@ -129,7 +129,9 @@ export function useCreateUser(options?: {
     setError(null);
     try {
       const result = await userService.createUser(formData);
-      options?.onSuccess?.(result);
+      if (result.data) {
+        options?.onSuccess?.(result.data);
+      }
     } catch (err) {
       const error = err instanceof Error ? err : new Error("创建用户失败");
       setError(error);
@@ -146,7 +148,7 @@ export function useCreateUser(options?: {
  * 更新用户
  */
 export function useUpdateUser(options?: {
-  onSuccess?: (data: User) => void;
+  onSuccess?: (data: { updatedAt: string }) => void;
   onError?: (error: Error) => void;
 }): MutationResult<{ id: string; data: Partial<UserFormData> }> {
   const [loading, setLoading] = useState(false);
@@ -158,7 +160,9 @@ export function useUpdateUser(options?: {
       setError(null);
       try {
         const result = await userService.updateUser(id, data);
-        options?.onSuccess?.(result);
+        if (result.data) {
+          options?.onSuccess?.(result.data);
+        }
       } catch (err) {
         const error = err instanceof Error ? err : new Error("更新用户失败");
         setError(error);
@@ -233,7 +237,7 @@ export function useBatchDeleteUsers(options?: {
  * 更新用户状态
  */
 export function useUpdateUserStatus(options?: {
-  onSuccess?: (data: User) => void;
+  onSuccess?: (data: User | null) => void;
   onError?: (error: Error) => void;
 }): MutationResult<{ id: string; status: UserStatus }> {
   const [loading, setLoading] = useState(false);
@@ -245,7 +249,7 @@ export function useUpdateUserStatus(options?: {
       setError(null);
       try {
         const result = await userService.updateUserStatus(id, status);
-        options?.onSuccess?.(result);
+        options?.onSuccess?.(result.data);
       } catch (err) {
         const error = err instanceof Error
           ? err

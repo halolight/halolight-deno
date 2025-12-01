@@ -14,7 +14,7 @@ interface UserProfileProps {
 export default function UserProfile(
   { className = "", showDropdown = true }: UserProfileProps,
 ) {
-  const { user, performLogout } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   if (!user) {
@@ -22,11 +22,11 @@ export default function UserProfile(
   }
 
   const displayName = authUtils.getDisplayName();
-  const avatarUrl = authUtils.getUserAvatar(40);
+  const avatarUrl = authUtils.getUserAvatar();
 
   const handleLogout = async () => {
     setIsDropdownOpen(false);
-    await performLogout();
+    await logout();
   };
 
   const toggleDropdown = () => {
@@ -102,7 +102,7 @@ export default function UserProfile(
             <div className="p-4 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center gap-3">
                 <img
-                  src={authUtils.getUserAvatar(48)}
+                  src={authUtils.getUserAvatar()}
                   alt={`${displayName}'s avatar`}
                   className="w-12 h-12 rounded-full"
                   loading="lazy"
@@ -205,7 +205,7 @@ export function UserAvatar(
 
   if (!user) return null;
 
-  const avatarUrl = authUtils.getUserAvatar(size);
+  const avatarUrl = authUtils.getUserAvatar();
   const displayName = authUtils.getDisplayName();
 
   return (

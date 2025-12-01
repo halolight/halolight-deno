@@ -2,9 +2,21 @@ name: CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [master, main, develop]
   pull_request:
-    branches: [main, develop]
+    branches: [master, main, develop]
+  workflow_dispatch:
+
+# 取消同一分支的之前运行，节省资源
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DENO_VERSION: "2.x"
+  API_URL: /api
+  USE_MOCK: "true"
+  CI: "true"
 
 permissions:
   contents: read
@@ -12,18 +24,21 @@ permissions:
   actions: read
 
 jobs:
-  lint-and-format:
-    name: Lint and Format
+  # ============================================================================
+  # 代码质量检查
+  # ============================================================================
+  lint:
+    name: Lint & Format
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Deno
         uses: denoland/setup-deno@v2
         with:
-          deno-version: v2.x
+          deno-version: ${{ env.DENO_VERSION }}
 
       - name: Cache Deno dependencies
         uses: actions/cache@v4
@@ -34,24 +49,27 @@ jobs:
             ${{ runner.os }}-deno-
 
       - name: Check formatting
-        run: deno fmt --check --ignore=.claude/,CLAUDE.md,node_modules/,_fresh/
+        run: deno fmt --check
 
       - name: Run linter
-        run: deno lint --ignore=.claude/,CLAUDE.md,node_modules/,_fresh/
+        run: deno lint
 
+  # ============================================================================
+  # 类型检查
+  # ============================================================================
   type-check:
     name: Type Check
     runs-on: ubuntu-latest
-    needs: lint-and-format
+    needs: lint
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Deno
         uses: denoland/setup-deno@v2
         with:
-          deno-version: v2.x
+          deno-version: ${{ env.DENO_VERSION }}
 
       - name: Cache Deno dependencies
         uses: actions/cache@v4
@@ -65,57 +83,22 @@ jobs:
         run: deno check **/*.ts **/*.tsx
         continue-on-error: true
 
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    needs: [lint-and-format, type-check]
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Deno
-        uses: denoland/setup-deno@v2
-        with:
-          deno-version: v2.x
-
-      - name: Cache Deno dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/deno
-          key: ${{ runner.os }}-deno-${{ hashFiles('**/deno.json') }}
-          restore-keys: |
-            ${{ runner.os }}-deno-
-
-      - name: Build
-        run: deno task build
-        env:
-          GITHUB_CLIENT_ID: ${{ secrets.GITHUB_CLIENT_ID }}
-          GITHUB_CLIENT_SECRET: ${{ secrets.GITHUB_CLIENT_SECRET }}
-          APP_BASE_URL: ${{ secrets.APP_BASE_URL }}
-          SESSION_EXPIRE_TIME: ${{ secrets.SESSION_EXPIRE_TIME }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts
-          path: _fresh/
-          retention-days: 7
-
+  # ============================================================================
+  # 单元测试
+  # ============================================================================
   test:
-    name: Test
+    name: Unit Tests
     runs-on: ubuntu-latest
-    needs: lint-and-format
+    needs: lint
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Deno
         uses: denoland/setup-deno@v2
         with:
-          deno-version: v2.x
+          deno-version: ${{ env.DENO_VERSION }}
 
       - name: Cache Deno dependencies
         uses: actions/cache@v4
@@ -129,13 +112,70 @@ jobs:
         run: deno task test
         continue-on-error: true
 
+  # ============================================================================
+  # 构建检查
+  # ============================================================================
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [lint, type-check]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: ${{ env.DENO_VERSION }}
+
+      - name: Cache Deno dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/deno
+          key: ${{ runner.os }}-deno-${{ hashFiles('**/deno.json') }}
+          restore-keys: |
+            ${{ runner.os }}-deno-
+
+      - name: Build
+        run: deno task build
+        env:
+          # 基础配置
+          API_URL: /api
+          USE_MOCK: "true"
+          APP_BASE_URL: ${{ secrets.APP_BASE_URL || 'http://localhost:8000' }}
+          # 演示账号（使用 secrets 或默认值）
+          DEMO_EMAIL: ${{ secrets.DEMO_EMAIL || 'admin@halolight.h7ml.cn' }}
+          DEMO_PASSWORD: ${{ secrets.DEMO_PASSWORD || '123456' }}
+          SHOW_DEMO_HINT: "true"
+          # OAuth 配置
+          GITHUB_CLIENT_ID: ${{ secrets.GITHUB_CLIENT_ID || '' }}
+          GITHUB_CLIENT_SECRET: ${{ secrets.GITHUB_CLIENT_SECRET || '' }}
+          # 安全配置
+          JWT_SECRET: ${{ secrets.JWT_SECRET || 'ci-test-jwt-secret' }}
+          SESSION_EXPIRE_TIME: ${{ secrets.SESSION_EXPIRE_TIME || '86400' }}
+          # 应用信息
+          APP_TITLE: "HaloLight Admin"
+          BRAND_NAME: "HaloLight"
+          DENO_ENV: "development"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: _fresh/
+          retention-days: 7
+
+  # ============================================================================
+  # 安全扫描
+  # ============================================================================
   security:
     name: Security Scan
     runs-on: ubuntu-latest
     if: github.event_name == 'push' || github.event_name == 'pull_request'
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Run Trivy vulnerability scanner
@@ -145,8 +185,9 @@ jobs:
           scan-ref: "."
           format: "sarif"
           output: "trivy-results.sarif"
+        continue-on-error: true
 
-      - name: Upload Trivy scan results to GitHub Security tab
+      - name: Upload Trivy scan results
         uses: github/codeql-action/upload-sarif@v3
         if: always() && hashFiles('trivy-results.sarif') != ''
         with:

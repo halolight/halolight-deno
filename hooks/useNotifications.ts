@@ -57,7 +57,7 @@ export function useNotifications(
     setError(null);
     try {
       const response = await notificationService.getNotifications();
-      setData(response);
+      setData(response.data.list);
     } catch (err) {
       setError(err instanceof Error ? err : new Error("获取通知列表失败"));
     } finally {
@@ -85,7 +85,7 @@ export function useUnreadNotificationCount(): UseUnreadCountResult {
     setError(null);
     try {
       const response = await notificationService.getUnreadCount();
-      setCount(response);
+      setCount(response.data);
     } catch (err) {
       setError(err instanceof Error ? err : new Error("获取未读数量失败"));
     } finally {

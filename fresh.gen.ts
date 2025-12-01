@@ -6,6 +6,7 @@ import * as $_404 from "./routes/_404.tsx";
 import * as $_app from "./routes/_app.tsx";
 import * as $about from "./routes/about.tsx";
 import * as $admin from "./routes/admin.tsx";
+import * as $analytics from "./routes/analytics.tsx";
 import * as $api_auth_callback from "./routes/api/auth/callback.ts";
 import * as $api_auth_github from "./routes/api/auth/github.ts";
 import * as $api_auth_logout from "./routes/api/auth/logout.ts";
@@ -24,16 +25,29 @@ import * as $api_notifications_mark_all_read from "./routes/api/notifications/ma
 import * as $api_notifications_unread_count from "./routes/api/notifications/unread-count.ts";
 import * as $api_users_id_ from "./routes/api/users/[id].ts";
 import * as $api_users_index from "./routes/api/users/index.ts";
+import * as $calendar from "./routes/calendar.tsx";
 import * as $components from "./routes/components.tsx";
 import * as $dashboard from "./routes/dashboard.tsx";
+import * as $documents from "./routes/documents.tsx";
+import * as $files from "./routes/files.tsx";
 import * as $forgot_password from "./routes/forgot-password.tsx";
 import * as $greet_name_ from "./routes/greet/[name].tsx";
 import * as $hooks from "./routes/hooks.tsx";
 import * as $index from "./routes/index.tsx";
 import * as $login from "./routes/login.tsx";
+import * as $messages from "./routes/messages.tsx";
+import * as $notifications from "./routes/notifications.tsx";
+import * as $privacy from "./routes/privacy.tsx";
 import * as $profile from "./routes/profile.tsx";
 import * as $register from "./routes/register.tsx";
 import * as $reset_password from "./routes/reset-password.tsx";
+import * as $settings_appearance from "./routes/settings/appearance.tsx";
+import * as $settings_index from "./routes/settings/index.tsx";
+import * as $settings_integrations from "./routes/settings/integrations.tsx";
+import * as $settings_notifications from "./routes/settings/notifications.tsx";
+import * as $settings_security from "./routes/settings/security.tsx";
+import * as $settings_teams_index from "./routes/settings/teams/index.tsx";
+import * as $settings_teams_roles from "./routes/settings/teams/roles.tsx";
 import * as $state from "./routes/state.tsx";
 import * as $status_401 from "./routes/status/401.tsx";
 import * as $status_403 from "./routes/status/403.tsx";
@@ -41,12 +55,16 @@ import * as $status_500 from "./routes/status/500.tsx";
 import * as $status_502 from "./routes/status/502.tsx";
 import * as $status_503 from "./routes/status/503.tsx";
 import * as $status_index from "./routes/status/index.tsx";
+import * as $terms from "./routes/terms.tsx";
+import * as $users from "./routes/users.tsx";
 import * as $AuthMenu from "./islands/AuthMenu.tsx";
+import * as $CommandMenuIsland from "./islands/CommandMenuIsland.tsx";
 import * as $ComponentsDemo from "./islands/ComponentsDemo.tsx";
 import * as $Counter from "./islands/Counter.tsx";
 import * as $CounterDemo from "./islands/CounterDemo.tsx";
 import * as $Dashboard from "./islands/Dashboard.tsx";
 import * as $ForgotPasswordForm from "./islands/ForgotPasswordForm.tsx";
+import * as $HeaderIsland from "./islands/HeaderIsland.tsx";
 import * as $HeaderNavigation from "./islands/HeaderNavigation.tsx";
 import * as $HooksDemo from "./islands/HooksDemo.tsx";
 import * as $LayoutManager from "./islands/LayoutManager.tsx";
@@ -54,6 +72,7 @@ import * as $LoginForm from "./islands/LoginForm.tsx";
 import * as $NavigationState from "./islands/NavigationState.tsx";
 import * as $RegisterForm from "./islands/RegisterForm.tsx";
 import * as $ResetPasswordForm from "./islands/ResetPasswordForm.tsx";
+import * as $SidebarIsland from "./islands/SidebarIsland.tsx";
 import * as $SidebarNavigation from "./islands/SidebarNavigation.tsx";
 import * as $SimpleStateDemo from "./islands/SimpleStateDemo.tsx";
 import * as $StateDemo from "./islands/StateDemo.tsx";
@@ -67,6 +86,7 @@ const manifest = {
     "./routes/_app.tsx": $_app,
     "./routes/about.tsx": $about,
     "./routes/admin.tsx": $admin,
+    "./routes/analytics.tsx": $analytics,
     "./routes/api/auth/callback.ts": $api_auth_callback,
     "./routes/api/auth/github.ts": $api_auth_github,
     "./routes/api/auth/logout.ts": $api_auth_logout,
@@ -87,16 +107,29 @@ const manifest = {
       $api_notifications_unread_count,
     "./routes/api/users/[id].ts": $api_users_id_,
     "./routes/api/users/index.ts": $api_users_index,
+    "./routes/calendar.tsx": $calendar,
     "./routes/components.tsx": $components,
     "./routes/dashboard.tsx": $dashboard,
+    "./routes/documents.tsx": $documents,
+    "./routes/files.tsx": $files,
     "./routes/forgot-password.tsx": $forgot_password,
     "./routes/greet/[name].tsx": $greet_name_,
     "./routes/hooks.tsx": $hooks,
     "./routes/index.tsx": $index,
     "./routes/login.tsx": $login,
+    "./routes/messages.tsx": $messages,
+    "./routes/notifications.tsx": $notifications,
+    "./routes/privacy.tsx": $privacy,
     "./routes/profile.tsx": $profile,
     "./routes/register.tsx": $register,
     "./routes/reset-password.tsx": $reset_password,
+    "./routes/settings/appearance.tsx": $settings_appearance,
+    "./routes/settings/index.tsx": $settings_index,
+    "./routes/settings/integrations.tsx": $settings_integrations,
+    "./routes/settings/notifications.tsx": $settings_notifications,
+    "./routes/settings/security.tsx": $settings_security,
+    "./routes/settings/teams/index.tsx": $settings_teams_index,
+    "./routes/settings/teams/roles.tsx": $settings_teams_roles,
     "./routes/state.tsx": $state,
     "./routes/status/401.tsx": $status_401,
     "./routes/status/403.tsx": $status_403,
@@ -104,14 +137,18 @@ const manifest = {
     "./routes/status/502.tsx": $status_502,
     "./routes/status/503.tsx": $status_503,
     "./routes/status/index.tsx": $status_index,
+    "./routes/terms.tsx": $terms,
+    "./routes/users.tsx": $users,
   },
   islands: {
     "./islands/AuthMenu.tsx": $AuthMenu,
+    "./islands/CommandMenuIsland.tsx": $CommandMenuIsland,
     "./islands/ComponentsDemo.tsx": $ComponentsDemo,
     "./islands/Counter.tsx": $Counter,
     "./islands/CounterDemo.tsx": $CounterDemo,
     "./islands/Dashboard.tsx": $Dashboard,
     "./islands/ForgotPasswordForm.tsx": $ForgotPasswordForm,
+    "./islands/HeaderIsland.tsx": $HeaderIsland,
     "./islands/HeaderNavigation.tsx": $HeaderNavigation,
     "./islands/HooksDemo.tsx": $HooksDemo,
     "./islands/LayoutManager.tsx": $LayoutManager,
@@ -119,6 +156,7 @@ const manifest = {
     "./islands/NavigationState.tsx": $NavigationState,
     "./islands/RegisterForm.tsx": $RegisterForm,
     "./islands/ResetPasswordForm.tsx": $ResetPasswordForm,
+    "./islands/SidebarIsland.tsx": $SidebarIsland,
     "./islands/SidebarNavigation.tsx": $SidebarNavigation,
     "./islands/SimpleStateDemo.tsx": $SimpleStateDemo,
     "./islands/StateDemo.tsx": $StateDemo,

@@ -3,9 +3,9 @@
  * 重置密码表单的客户端交互组件
  */
 
+import { IS_BROWSER } from "$fresh/runtime.ts";
 import type { JSX } from "preact";
 import { useEffect, useMemo, useState } from "preact/hooks";
-import { useAuthStore } from "../stores/useAuthStore.ts";
 import { cn } from "../lib/utils.ts";
 import {
   getPasswordStrength,
@@ -255,7 +255,9 @@ interface ResetPasswordFormProps {
 export default function ResetPasswordForm(
   { token }: ResetPasswordFormProps,
 ): JSX.Element {
-  const { resetPassword, isLoading, error, clearError } = useAuthStore();
+  // 客户端状态 - 避免 SSR 时调用 Zustand
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     password: "",
@@ -270,6 +272,29 @@ export default function ResetPasswordForm(
     () => getPasswordStrength(formData.password),
     [formData.password],
   );
+
+  // 客户端初始化 store 订阅
+  useEffect(() => {
+    if (!IS_BROWSER) return;
+
+    const initStore = async () => {
+      const { useAuthStore } = await import("../stores/useAuthStore.ts");
+
+      const unsubscribe = useAuthStore.subscribe((state) => {
+        setIsLoading(state.isLoading);
+        setError(state.error);
+      });
+
+      const state = useAuthStore.getState();
+      setIsLoading(state.isLoading);
+      setError(state.error);
+      useAuthStore.getState().clearError();
+
+      return unsubscribe;
+    };
+
+    initStore();
+  }, []);
 
   const handleSubmit = async (e: Event) => {
     e.preventDefault();
@@ -295,17 +320,16 @@ export default function ResetPasswordForm(
       return;
     }
 
+    if (!IS_BROWSER) return;
+
     try {
-      await resetPassword(token, formData.password);
+      const { useAuthStore } = await import("../stores/useAuthStore.ts");
+      await useAuthStore.getState().resetPassword(token, formData.password);
       setIsSuccess(true);
     } catch {
       // 错误已在 store 中处理
     }
   };
-
-  useEffect(() => {
-    clearError();
-  }, [clearError]);
 
   // 无效 token 页面
   if (!token) {

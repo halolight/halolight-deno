@@ -38,7 +38,7 @@ export interface AuthState {
   login: (data: LoginRequest) => Promise<void>;
   register: (data: RegisterRequest) => Promise<void>;
   logout: () => Promise<void>;
-  switchAccount: (accountId: string) => Promise<void>;
+  switchAccount: (accountId: string) => void;
   loadAccounts: () => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (token: string, password: string) => Promise<void>;
@@ -110,8 +110,13 @@ export const useAuthStore = create<AuthState>()(
             : 1;
           setCookie("token", response.token, days);
 
+          // 将 user 和 token 合并成 AccountWithToken
+          const accountWithToken: AccountWithToken = {
+            ...response.user,
+            token: response.token,
+          };
           set({
-            user: response.user,
+            user: accountWithToken,
             token: response.token,
             activeAccountId: response.user.id,
             isAuthenticated: true,
@@ -136,8 +141,13 @@ export const useAuthStore = create<AuthState>()(
 
           setCookie("token", response.token, 1);
 
+          // 将 user 和 token 合并成 AccountWithToken
+          const accountWithToken: AccountWithToken = {
+            ...response.user,
+            token: response.token,
+          };
           set({
-            user: response.user,
+            user: accountWithToken,
             token: response.token,
             activeAccountId: response.user.id,
             isAuthenticated: true,

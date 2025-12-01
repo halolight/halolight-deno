@@ -52,12 +52,8 @@ export function ScrollArea({
         orientation === "horizontal" && "overflow-x-auto overflow-y-hidden",
         orientation === "both" && "overflow-auto",
         // 自定义滚动条样式
-        !hideScrollbar && [
-          "scrollbar-thin",
-          "scrollbar-track-transparent",
-          "scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600",
-          "hover:scrollbar-thumb-gray-400 dark:hover:scrollbar-thumb-gray-500",
-        ],
+        !hideScrollbar &&
+          "scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 hover:scrollbar-thumb-gray-400 dark:hover:scrollbar-thumb-gray-500",
         hideScrollbar && "scrollbar-none",
         className,
       )}

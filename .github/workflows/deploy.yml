@@ -2,9 +2,16 @@ name: Deploy
 
 on:
   push:
-    branches: main
-  pull_request:
-    branches: main
+    branches: [main]
+  workflow_dispatch:
+
+# 取消同一分支的之前运行，节省资源
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DENO_VERSION: "2.x"
 
 jobs:
   deploy:
@@ -16,13 +23,13 @@ jobs:
       contents: read
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Deno
         uses: denoland/setup-deno@v2
         with:
-          deno-version: v2.x
+          deno-version: ${{ env.DENO_VERSION }}
 
       - name: Cache Deno dependencies
         uses: actions/cache@v4
@@ -35,11 +42,24 @@ jobs:
       - name: Build
         run: deno task build
         env:
+          # 基础配置
+          API_URL: /api
+          USE_MOCK: "false"
+          APP_BASE_URL: https://halolight-deno.deno.dev
+          # 演示账号（使用 secrets 或默认值）
+          DEMO_EMAIL: ${{ secrets.DEMO_EMAIL || 'admin@halolight.h7ml.cn' }}
+          DEMO_PASSWORD: ${{ secrets.DEMO_PASSWORD || '123456' }}
+          SHOW_DEMO_HINT: "true"
+          # OAuth 配置
           GITHUB_CLIENT_ID: ${{ secrets.GITHUB_CLIENT_ID }}
           GITHUB_CLIENT_SECRET: ${{ secrets.GITHUB_CLIENT_SECRET }}
-          APP_BASE_URL: ${{ secrets.APP_BASE_URL }}
-          SESSION_EXPIRE_TIME: ${{ secrets.SESSION_EXPIRE_TIME }}
+          # 安全配置
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          SESSION_EXPIRE_TIME: ${{ secrets.SESSION_EXPIRE_TIME }}
+          # 应用信息
+          APP_TITLE: "HaloLight Admin"
+          BRAND_NAME: "HaloLight"
+          DENO_ENV: "production"
 
       - name: Upload to Deno Deploy
         uses: denoland/deployctl@v1

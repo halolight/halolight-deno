@@ -1,10 +1,10 @@
-import { JSX } from "preact";
+import type { ComponentChildren, JSX } from "preact";
 import { forwardRef } from "preact/compat";
 
-interface CardProps extends JSX.HTMLAttributes<HTMLDivElement> {
+export interface CardProps extends JSX.HTMLAttributes<HTMLDivElement> {
   variant?: "default" | "hover" | "glass";
   padding?: "sm" | "md" | "lg";
-  children: JSX.Element | JSX.Element[] | string;
+  children: ComponentChildren;
 }
 
 const Card = forwardRef<HTMLDivElement, CardProps>(({
@@ -47,8 +47,8 @@ const Card = forwardRef<HTMLDivElement, CardProps>(({
 Card.displayName = "Card";
 
 // Card子组件
-interface CardHeaderProps extends JSX.HTMLAttributes<HTMLDivElement> {
-  children: JSX.Element | JSX.Element[] | string;
+export interface CardHeaderProps extends JSX.HTMLAttributes<HTMLDivElement> {
+  children: ComponentChildren;
 }
 
 export const CardHeader = (
@@ -59,8 +59,8 @@ export const CardHeader = (
   </div>
 );
 
-interface CardTitleProps extends JSX.HTMLAttributes<HTMLHeadingElement> {
-  children: JSX.Element | string;
+export interface CardTitleProps extends JSX.HTMLAttributes<HTMLHeadingElement> {
+  children: ComponentChildren;
   as?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
 }
 
@@ -75,8 +75,8 @@ export const CardTitle = (
   </Component>
 );
 
-interface CardContentProps extends JSX.HTMLAttributes<HTMLDivElement> {
-  children: JSX.Element | JSX.Element[] | string;
+export interface CardContentProps extends JSX.HTMLAttributes<HTMLDivElement> {
+  children: ComponentChildren;
 }
 
 export const CardContent = (
@@ -87,8 +87,8 @@ export const CardContent = (
   </div>
 );
 
-interface CardFooterProps extends JSX.HTMLAttributes<HTMLDivElement> {
-  children: JSX.Element | JSX.Element[] | string;
+export interface CardFooterProps extends JSX.HTMLAttributes<HTMLDivElement> {
+  children: ComponentChildren;
 }
 
 export const CardFooter = (
@@ -100,6 +100,22 @@ export const CardFooter = (
   >
     {children}
   </div>
+);
+
+export interface CardDescriptionProps
+  extends JSX.HTMLAttributes<HTMLParagraphElement> {
+  children: ComponentChildren;
+}
+
+export const CardDescription = (
+  { children, className = "", ...props }: CardDescriptionProps,
+) => (
+  <p
+    className={`text-sm text-gray-500 dark:text-gray-400 ${className}`}
+    {...props}
+  >
+    {children}
+  </p>
 );
 
 export default Card;

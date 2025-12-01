@@ -3,9 +3,9 @@
  * 登录表单的客户端交互组件
  */
 
+import { IS_BROWSER } from "$fresh/runtime.ts";
 import type { JSX } from "preact";
 import { useCallback, useEffect, useState } from "preact/hooks";
-import { useAuthStore } from "../stores/useAuthStore.ts";
 import { cn } from "../lib/utils.ts";
 import { AuthShell } from "../components/auth/AuthShell.tsx";
 import Card, {
@@ -207,7 +207,9 @@ export default function LoginForm({
   demoPassword = "",
   showDemoHint = false,
 }: LoginFormProps): JSX.Element {
-  const { login, isLoading, error, clearError } = useAuthStore();
+  // 客户端状态 - 避免 SSR 时调用 Zustand
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -216,6 +218,33 @@ export default function LoginForm({
   });
   const [showPassword, setShowPassword] = useState(false);
   const [localError, setLocalError] = useState("");
+
+  // 客户端初始化 store 订阅
+  useEffect(() => {
+    if (!IS_BROWSER) return;
+
+    const initStore = async () => {
+      const { useAuthStore } = await import("../stores/useAuthStore.ts");
+
+      // 订阅 store 状态变化
+      const unsubscribe = useAuthStore.subscribe((state) => {
+        setIsLoading(state.isLoading);
+        setError(state.error);
+      });
+
+      // 初始化当前状态
+      const state = useAuthStore.getState();
+      setIsLoading(state.isLoading);
+      setError(state.error);
+
+      // 清除错误
+      useAuthStore.getState().clearError();
+
+      return unsubscribe;
+    };
+
+    initStore();
+  }, []);
 
   const fillDemoCredentials = useCallback(() => {
     if (demoEmail && demoPassword) {
@@ -236,8 +265,11 @@ export default function LoginForm({
       return;
     }
 
+    if (!IS_BROWSER) return;
+
     try {
-      await login(formData);
+      const { useAuthStore } = await import("../stores/useAuthStore.ts");
+      await useAuthStore.getState().login(formData);
       // 登录成功后跳转
       globalThis.location.href = "/dashboard";
     } catch {
@@ -248,10 +280,6 @@ export default function LoginForm({
   const handleSocialLogin = (provider: string) => {
     console.log(`使用 ${provider} 登录`);
   };
-
-  useEffect(() => {
-    clearError();
-  }, [clearError]);
 
   return (
     <AuthShell
@@ -271,7 +299,7 @@ export default function LoginForm({
 
           <h1 className="text-5xl xl:text-6xl font-bold mb-6 leading-tight">
             欢迎回来
-            <span className="inline-block ml-2 animate-pulse">👋</span>
+            <span className="inline-block ml-2 animate-pulse-opacity">👋</span>
           </h1>
           <p className="text-lg text-white/70 max-w-md leading-relaxed mb-12">
             登录您的账户，开始管理您的业务数据和团队协作，体验高效的工作流程。
@@ -315,30 +343,51 @@ export default function LoginForm({
             <div className="h-1 bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600" />
 
             <CardHeader className="space-y-1 text-center pb-3 sm:pb-5 pt-4 sm:pt-7">
-              <h3 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                登录账户
-              </h3>
-              <p className="text-xs sm:text-sm mt-2 text-gray-500 dark:text-gray-400">
-                输入您的邮箱和密码登录
-              </p>
+              <div className="animate-fade-in-scale stagger-4">
+                <h3 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  登录账户
+                </h3>
+                <p className="text-xs sm:text-sm mt-2 text-gray-500 dark:text-gray-400">
+                  输入您的邮箱和密码登录
+                </p>
+              </div>
             </CardHeader>
 
             <CardContent className="space-y-3 sm:space-y-4 px-4 sm:px-6">
               {/* 社交登录按钮 */}
               <div className="grid grid-cols-3 gap-2 sm:gap-3">
                 {[
-                  { icon: GithubIcon, name: "github", label: "GitHub" },
-                  { icon: GoogleIcon, name: "google", label: "Google" },
-                  { icon: WechatIcon, name: "wechat", label: "微信" },
+                  {
+                    icon: GithubIcon,
+                    name: "github",
+                    label: "GitHub",
+                    delay: "5",
+                  },
+                  {
+                    icon: GoogleIcon,
+                    name: "google",
+                    label: "Google",
+                    delay: "6",
+                  },
+                  {
+                    icon: WechatIcon,
+                    name: "wechat",
+                    label: "微信",
+                    delay: "7",
+                  },
                 ].map((provider) => (
-                  <Button
+                  <div
                     key={provider.name}
-                    variant="outline"
-                    className="w-full h-11 sm:h-12 border-gray-200/50 dark:border-gray-700/50 hover:border-primary-500/50 hover:bg-primary-500/5 transition-all duration-300 group"
-                    onClick={() => handleSocialLogin(provider.name)}
+                    className={`animate-slide-in-up stagger-${provider.delay}`}
                   >
-                    <provider.icon className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                  </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full h-11 sm:h-12 border-gray-200/50 dark:border-gray-700/50 hover:border-primary-500/50 hover:bg-primary-500/5 transition-all duration-300 group"
+                      onClick={() => handleSocialLogin(provider.name)}
+                    >
+                      <provider.icon className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                    </Button>
+                  </div>
                 ))}
               </div>
 
@@ -360,7 +409,7 @@ export default function LoginForm({
                 )}
 
                 {/* 邮箱输入 */}
-                <div className="space-y-2">
+                <div className="space-y-2 animate-slide-in-up stagger-6">
                   <label className="text-xs font-medium text-gray-500 dark:text-gray-400">
                     邮箱地址
                   </label>
@@ -381,7 +430,7 @@ export default function LoginForm({
                 </div>
 
                 {/* 密码输入 */}
-                <div className="space-y-2">
+                <div className="space-y-2 animate-slide-in-up stagger-7">
                   <label className="text-xs font-medium text-gray-500 dark:text-gray-400">
                     密码
                   </label>
@@ -411,7 +460,7 @@ export default function LoginForm({
                 </div>
 
                 {/* 记住我 & 忘记密码 */}
-                <div className="flex items-center justify-between text-xs sm:text-sm">
+                <div className="flex items-center justify-between text-xs sm:text-sm animate-slide-in-up stagger-8">
                   <Checkbox
                     checked={formData.remember}
                     onChange={(checked) =>
@@ -428,7 +477,7 @@ export default function LoginForm({
 
                 {/* 测试账号按钮 */}
                 {demoEmail && demoPassword && (
-                  <div className="flex items-center gap-2 py-2">
+                  <div className="flex items-center gap-2 py-2 animate-slide-in-up stagger-9">
                     <div className="flex-1 h-px bg-gray-200/50 dark:bg-gray-700/50" />
                     <Button
                       type="button"
@@ -445,25 +494,27 @@ export default function LoginForm({
                 )}
 
                 {/* 登录按钮 */}
-                <Button
-                  type="submit"
-                  className="w-full h-12 text-sm font-medium bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
-                  disabled={isLoading}
-                >
-                  {isLoading
-                    ? (
-                      <>
-                        <LoaderIcon className="mr-2 h-4 w-4" />
-                        登录中...
-                      </>
-                    )
-                    : (
-                      <>
-                        登录
-                        <span className="ml-2">→</span>
-                      </>
-                    )}
-                </Button>
+                <div className="animate-slide-in-up stagger-10">
+                  <Button
+                    type="submit"
+                    className="w-full h-12 text-sm font-medium bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                    disabled={isLoading}
+                  >
+                    {isLoading
+                      ? (
+                        <>
+                          <LoaderIcon className="mr-2 h-4 w-4" />
+                          登录中...
+                        </>
+                      )
+                      : (
+                        <>
+                          登录
+                          <span className="ml-2 animate-arrow-slide">→</span>
+                        </>
+                      )}
+                  </Button>
+                </div>
               </form>
             </CardContent>
 
@@ -539,6 +590,46 @@ export default function LoginForm({
               }
             }
 
+            @keyframes fade-in-scale {
+              from {
+                opacity: 0;
+                transform: scale(0.8);
+              }
+              to {
+                opacity: 1;
+                transform: scale(1);
+              }
+            }
+
+            @keyframes slide-in-up {
+              from {
+                opacity: 0;
+                transform: translateY(20px);
+              }
+              to {
+                opacity: 1;
+                transform: translateY(0);
+              }
+            }
+
+            @keyframes pulse-opacity {
+              0%, 100% {
+                opacity: 1;
+              }
+              50% {
+                opacity: 0.5;
+              }
+            }
+
+            @keyframes arrow-slide {
+              0%, 100% {
+                transform: translateX(0);
+              }
+              50% {
+                transform: translateX(4px);
+              }
+            }
+
             .animate-fade-in-up {
               animation: fade-in-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
             }
@@ -552,9 +643,39 @@ export default function LoginForm({
               animation: fade-in 0.3s ease-out forwards;
             }
 
+            .animate-fade-in-scale {
+              animation: fade-in-scale 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+              opacity: 0;
+            }
+
+            .animate-slide-in-up {
+              animation: slide-in-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+              opacity: 0;
+            }
+
+            .animate-pulse-opacity {
+              animation: pulse-opacity 2s ease-in-out infinite;
+            }
+
+            .animate-arrow-slide {
+              display: inline-block;
+              animation: arrow-slide 1.5s ease-in-out infinite;
+            }
+
             .hover\\:scale-102:hover {
               transform: scale(1.02);
             }
+
+            .stagger-1 { animation-delay: 0.1s; }
+            .stagger-2 { animation-delay: 0.2s; }
+            .stagger-3 { animation-delay: 0.3s; }
+            .stagger-4 { animation-delay: 0.4s; }
+            .stagger-5 { animation-delay: 0.5s; }
+            .stagger-6 { animation-delay: 0.6s; }
+            .stagger-7 { animation-delay: 0.7s; }
+            .stagger-8 { animation-delay: 0.8s; }
+            .stagger-9 { animation-delay: 0.9s; }
+            .stagger-10 { animation-delay: 1.0s; }
           `}
           </style>
         </div>

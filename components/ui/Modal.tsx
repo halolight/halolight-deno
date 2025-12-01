@@ -2,7 +2,7 @@ import { JSX } from "preact";
 import { useEffect } from "preact/hooks";
 import { createPortal } from "preact/compat";
 
-interface ModalProps {
+export interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title?: string;

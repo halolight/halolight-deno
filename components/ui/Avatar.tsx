@@ -12,9 +12,11 @@ import { cn } from "../../lib/utils.ts";
 
 export interface AvatarProps {
   /** 头像图片 URL */
-  src?: string;
+  src?: string | null;
   /** 替代文本 */
   alt?: string;
+  /** 用户名（用于生成回退文字） */
+  name?: string;
   /** 回退显示的文字（通常是用户名首字母） */
   fallback?: string;
   /** 尺寸 */
@@ -47,6 +49,7 @@ const sizeClasses = {
 export function Avatar({
   src,
   alt = "",
+  name,
   fallback,
   size = "md",
   className,
@@ -60,6 +63,12 @@ export function Avatar({
       (fallbackEl as HTMLElement).style.display = "flex";
     }
   };
+
+  // 生成回退文字：优先使用 fallback，其次 name 首字母，再次 alt 首字母
+  const fallbackText = fallback ||
+    name?.charAt(0)?.toUpperCase() ||
+    alt?.charAt(0)?.toUpperCase() ||
+    "?";
 
   return (
     <div
@@ -78,21 +87,21 @@ export function Avatar({
           <>
             <img
               src={src}
-              alt={alt}
+              alt={alt || name}
               className="aspect-square h-full w-full object-cover"
               onError={handleImageError}
             />
             <div
-              className="absolute inset-0 flex items-center justify-center bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300 font-medium"
+              className="absolute inset-0 flex items-center justify-center bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 font-medium"
               style={{ display: "none" }}
             >
-              {fallback || alt?.charAt(0)?.toUpperCase() || "?"}
+              {fallbackText}
             </div>
           </>
         )
         : (
-          <div className="flex h-full w-full items-center justify-center bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300 font-medium">
-            {fallback || alt?.charAt(0)?.toUpperCase() || "?"}
+          <div className="flex h-full w-full items-center justify-center bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 font-medium">
+            {fallbackText}
           </div>
         )}
     </div>
