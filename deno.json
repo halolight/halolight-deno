@@ -1,0 +1,95 @@
+{
+  "lock": false,
+  "name": "halolight-deno",
+  "version": "1.0.0",
+  "description": "HaloLight Admin - 基于 Fresh (Deno) + Preact + TailwindCSS + Zustand 构建的现代化企业级管理系统模板",
+  "keywords": [
+    "Preact",
+    "Deno",
+    "Fresh",
+    "TailwindCSS",
+    "Sass",
+    "Zustand",
+    "TypeScript",
+    "Admin",
+    "Dashboard",
+    "Enterprise"
+  ],
+  "author": "HaloLight Team",
+  "license": "MIT",
+  "exports": {
+    ".": "./main.ts",
+    "./components": "./components/index.ts",
+    "./hooks": "./hooks/index.ts",
+    "./stores": "./stores/index.ts",
+    "./utils": "./utils/index.ts",
+    "./providers": "./providers/index.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/user/halolight-deno.git"
+  },
+  "bugs": {
+    "url": "https://github.com/user/halolight-deno/issues"
+  },
+  "issues": "https://github.com/user/halolight-deno/issues",
+  "homepage": "https://halolight-deno.deno.dev",
+  "tasks": {
+    "check": "deno fmt --check && deno lint && deno check **/*.ts && deno check **/*.tsx",
+    "fmt": "deno fmt",
+    "lint": "deno lint",
+    "cli": "echo \"import '\\$fresh/src/dev/cli.ts'\" | deno run --unstable -A -",
+    "manifest": "deno task cli manifest $(pwd)",
+    "start": "deno run -A --watch=static/,routes/ dev.ts",
+    "build": "deno run -A dev.ts build",
+    "preview": "deno run -A main.ts",
+    "update": "deno run -A -r https://fresh.deno.dev/update .",
+    "test": "deno test --allow-all",
+    "test:coverage": "deno test --allow-all --coverage=coverage",
+    "coverage": "deno coverage coverage --lcov > coverage.lcov"
+  },
+  "lint": {
+    "rules": {
+      "tags": [
+        "fresh",
+        "recommended"
+      ]
+    },
+    "exclude": [
+      "_fresh/",
+      "node_modules/",
+      ".claude/"
+    ]
+  },
+  "fmt": {
+    "exclude": [
+      "_fresh/",
+      "node_modules/",
+      ".claude/"
+    ]
+  },
+  "exclude": [
+    "**/_fresh/*",
+    "**/node_modules/*",
+    "**/.claude/*"
+  ],
+  "imports": {
+    "$fresh/": "https://deno.land/x/fresh@1.7.3/",
+    "preact": "https://esm.sh/preact@10.22.0",
+    "preact/": "https://esm.sh/preact@10.22.0/",
+    "@preact/signals": "https://esm.sh/*@preact/signals@1.2.2",
+    "@preact/signals-core": "https://esm.sh/*@preact/signals-core@1.5.1",
+    "tailwindcss": "npm:tailwindcss@3.4.1",
+    "tailwindcss/": "npm:/tailwindcss@3.4.1/",
+    "tailwindcss/plugin": "npm:/tailwindcss@3.4.1/plugin.js",
+    "sass": "npm:sass@1.69.5",
+    "zustand": "npm:zustand@4.4.7",
+    "djwt": "https://deno.land/x/djwt@v3.0.2/mod.ts",
+    "$std/": "https://deno.land/std@0.216.0/"
+  },
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact"
+  },
+  "nodeModulesDir": "auto"
+}
