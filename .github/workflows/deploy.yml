@@ -61,9 +61,5 @@ jobs:
           BRAND_NAME: "HaloLight"
           DENO_ENV: "production"
 
-      - name: Upload to Deno Deploy
-        uses: denoland/deployctl@v1
-        with:
-          project: "halolight-deno"
-          entrypoint: "main.ts"
-          root: "."
+      # 部署由 Deno Deploy 控制台自动完成（GitHub 集成）
+      # 如需手动部署，使用: deployctl deploy --project=halolight-deno main.ts
