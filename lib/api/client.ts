@@ -17,7 +17,10 @@ import type {
 // 配置
 // ============================================================================
 
-const API_BASE_URL = Deno.env.get("API_URL") || "/api";
+// 检查是否在浏览器环境，Deno.env 只在服务端可用
+const API_BASE_URL = typeof Deno !== "undefined" && Deno.env
+  ? (Deno.env.get("API_URL") || "/api")
+  : "/api";
 
 // ============================================================================
 // Cookie 工具函数
