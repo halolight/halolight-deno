@@ -47,8 +47,8 @@ export default function SecuritySettingsPage() {
         <title>安全设置 - HaloLight</title>
         <meta name="description" content="密码、两步验证和登录记录" />
       </Head>
-      <Layout>
-        <div className="max-w-4xl mx-auto py-8 px-4">
+      <Layout title="安全设置" showSidebar>
+        <div className="space-y-6">
           {/* 面包屑 */}
           <nav className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-6">
             <a

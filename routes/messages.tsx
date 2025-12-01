@@ -111,8 +111,8 @@ export default function MessagesPage() {
         <title>消息中心 - HaloLight</title>
         <meta name="description" content="查看和管理您的消息" />
       </Head>
-      <Layout>
-        <div className="h-[calc(100vh-4rem)]">
+      <Layout title="消息中心" showSidebar>
+        <div className="h-[calc(100vh-12rem)]">
           <div className="flex h-full">
             {/* 会话列表 */}
             <div className="w-80 border-r border-gray-200 dark:border-gray-800 flex flex-col">

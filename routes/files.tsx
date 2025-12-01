@@ -161,8 +161,8 @@ export default function FilesPage() {
         <title>文件管理 - HaloLight</title>
         <meta name="description" content="管理您的文件和媒体资源" />
       </Head>
-      <Layout>
-        <div className="max-w-6xl mx-auto py-8 px-4">
+      <Layout title="文件管理" showSidebar>
+        <div className="space-y-6">
           {/* 标题和操作 */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
             <div>

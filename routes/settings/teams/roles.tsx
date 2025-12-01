@@ -93,8 +93,8 @@ export default function RolesPage() {
         <title>角色权限 - HaloLight</title>
         <meta name="description" content="管理角色和权限设置" />
       </Head>
-      <Layout>
-        <div className="max-w-4xl mx-auto py-8 px-4">
+      <Layout title="角色权限" showSidebar>
+        <div className="space-y-6">
           {/* 面包屑 */}
           <nav className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-6">
             <a

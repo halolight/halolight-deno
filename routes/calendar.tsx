@@ -117,8 +117,8 @@ export default function CalendarPage() {
         <title>日历 - HaloLight</title>
         <meta name="description" content="查看日程安排" />
       </Head>
-      <Layout>
-        <div className="max-w-6xl mx-auto py-8 px-4">
+      <Layout title="日历" showSidebar>
+        <div className="space-y-6">
           {/* 标题和操作 */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
             <div>

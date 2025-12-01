@@ -87,8 +87,8 @@ export default function NotificationsSettingsPage() {
         <title>通知设置 - HaloLight</title>
         <meta name="description" content="配置通知偏好和提醒方式" />
       </Head>
-      <Layout>
-        <div className="max-w-4xl mx-auto py-8 px-4">
+      <Layout title="通知设置" showSidebar>
+        <div className="space-y-6">
           {/* 面包屑 */}
           <nav className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-6">
             <a

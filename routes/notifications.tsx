@@ -204,8 +204,8 @@ export default function NotificationsPage() {
         <title>通知中心 - HaloLight</title>
         <meta name="description" content="查看和管理您的通知" />
       </Head>
-      <Layout>
-        <div className="max-w-3xl mx-auto py-8 px-4">
+      <Layout title="通知中心" showSidebar>
+        <div className="space-y-6">
           {/* 标题和操作 */}
           <div className="flex items-center justify-between mb-8">
             <div>

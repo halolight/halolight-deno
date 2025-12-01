@@ -93,8 +93,8 @@ export default function AppearanceSettingsPage() {
         <title>外观设置 - HaloLight</title>
         <meta name="description" content="主题、语言和界面偏好" />
       </Head>
-      <Layout>
-        <div className="max-w-4xl mx-auto py-8 px-4">
+      <Layout title="外观设置" showSidebar>
+        <div className="space-y-6">
           {/* 面包屑 */}
           <nav className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-6">
             <a

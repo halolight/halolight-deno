@@ -140,8 +140,8 @@ export default function SettingsPage() {
         <title>设置 - HaloLight</title>
         <meta name="description" content="管理您的账户设置和偏好" />
       </Head>
-      <Layout>
-        <div className="max-w-4xl mx-auto py-8 px-4">
+      <Layout title="设置" showSidebar>
+        <div className="space-y-6">
           <div className="mb-8">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
               设置
