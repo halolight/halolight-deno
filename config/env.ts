@@ -71,7 +71,12 @@ export const env = {
   // 可选配置
   databaseUrl: getEnv("DATABASE_URL", ""),
   redisUrl: getEnv("REDIS_URL", ""),
+
+  // 统计分析
   gaId: getEnv("GA_ID", ""),
+  laId: getEnv("LA_ID", ""),
+
+  // 错误追踪
   sentryDsn: getEnv("SENTRY_DSN", ""),
 } as const;
 
