@@ -6,8 +6,14 @@
 import type { JSX } from "preact";
 import { useEffect, useState } from "preact/hooks";
 import { cn } from "../lib/utils.ts";
-import { dashboardService } from "../lib/api/services.ts";
-import type { Activity, DashboardStats, VisitData } from "../lib/api/types.ts";
+import { dashboardService, userService } from "../lib/api/services.ts";
+import type {
+  Activity,
+  DashboardStats,
+  SalesData,
+  User,
+  VisitData,
+} from "../lib/api/types.ts";
 import Card, {
   CardContent,
   CardHeader,
@@ -15,6 +21,11 @@ import Card, {
 } from "../components/ui/Card.tsx";
 import Button from "../components/ui/Button.tsx";
 import { Skeleton } from "../components/ui/Skeleton.tsx";
+import {
+  BarChartWidget,
+  PieChartWidget,
+  RecentUsersWidget,
+} from "../components/dashboard/ChartWidgets.tsx";
 
 // ============================================================================
 // 图标组件
@@ -358,16 +369,32 @@ export default function Dashboard(): JSX.Element {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [visits, setVisits] = useState<VisitData[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
+  const [salesData, setSalesData] = useState<SalesData[]>([]);
+  const [trafficSources, setTrafficSources] = useState<
+    { name: string; value: number }[]
+  >([]);
+  const [recentUsers, setRecentUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const fetchData = async () => {
     try {
-      const [statsRes, visitsRes, activitiesRes] = await Promise.all([
+      const [
+        statsRes,
+        visitsRes,
+        activitiesRes,
+        salesRes,
+        trafficRes,
+        usersRes,
+      ] = await Promise.all([
         dashboardService.getStats(),
         dashboardService.getVisits(),
         dashboardService.getActivities(),
+        dashboardService.getSales(),
+        dashboardService.getTrafficSources(),
+        userService.getUsers({ page: 1, pageSize: 5 }),
       ]);
+
       // 从 ApiResponse 中提取 data 字段
       if (statsRes.code === 200 && statsRes.data) {
         setStats(statsRes.data);
@@ -377,6 +404,15 @@ export default function Dashboard(): JSX.Element {
       }
       if (activitiesRes.code === 200 && activitiesRes.data) {
         setActivities(activitiesRes.data);
+      }
+      if (salesRes.code === 200 && salesRes.data) {
+        setSalesData(salesRes.data);
+      }
+      if (trafficRes.code === 200 && trafficRes.data) {
+        setTrafficSources(trafficRes.data);
+      }
+      if (usersRes.code === 200 && usersRes.data?.list) {
+        setRecentUsers(usersRes.data.list);
       }
     } catch (error) {
       console.error("Failed to fetch dashboard data:", error);
@@ -455,7 +491,7 @@ export default function Dashboard(): JSX.Element {
         />
       </div>
 
-      {/* 图表和活动 */}
+      {/* 图表和活动 - 第一行 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <SimpleBarChart
           title="访问趋势"
@@ -465,6 +501,30 @@ export default function Dashboard(): JSX.Element {
         <ActivityList
           activities={activities}
           loading={loading}
+        />
+      </div>
+
+      {/* 图表和活动 - 第二行 */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <BarChartWidget
+          data={salesData.slice(-6)}
+          loading={loading}
+          title="销售趋势"
+        />
+        <PieChartWidget
+          data={trafficSources}
+          loading={loading}
+          title="流量来源"
+        />
+        <RecentUsersWidget
+          users={recentUsers.map((u) => ({
+            name: u.name,
+            email: u.email,
+            avatar: u.avatar,
+          }))}
+          loading={loading}
+          title="最近用户"
+          maxItems={5}
         />
       </div>
 

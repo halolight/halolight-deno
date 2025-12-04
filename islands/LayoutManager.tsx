@@ -8,6 +8,8 @@ import Header from "../components/layout/Header.tsx";
 import SidebarIsland from "./SidebarIsland.tsx";
 import CommandMenuIsland from "./CommandMenuIsland.tsx";
 import { AdminFooter } from "../components/layout/Footer.tsx";
+import WebSocketProvider from "./WebSocketProvider.tsx";
+import type { Notification } from "../lib/api/types.ts";
 
 interface LayoutManagerProps {
   children: JSX.Element | JSX.Element[] | string;
@@ -35,6 +37,12 @@ const LayoutManager = ({
 
   // 搜索对话框状态
   const [searchOpen, setSearchOpen] = useState(false);
+
+  // WebSocket 通知处理
+  const handleWebSocketNotification = (notification: Notification) => {
+    console.log("Real-time notification received:", notification);
+    // 可以在这里添加通知弹窗、音效等
+  };
 
   // 初始化主题
   useEffect(() => {
@@ -137,54 +145,59 @@ const LayoutManager = ({
     : 0;
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
-      {/* 搜索对话框 */}
-      <CommandMenuIsland open={searchOpen} onOpenChange={setSearchOpen} />
+    <WebSocketProvider
+      autoConnect={true}
+      onNotification={handleWebSocketNotification}
+    >
+      <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+        {/* 搜索对话框 */}
+        <CommandMenuIsland open={searchOpen} onOpenChange={setSearchOpen} />
 
-      {/* 侧边栏 */}
-      {showSidebar && (
-        <SidebarIsland
-          collapsed={sidebarCollapsed}
-          onCollapsedChange={setSidebarCollapsed}
-          mobileOpen={mobileMenuOpen}
-          onMobileClose={() => setMobileMenuOpen(false)}
-          expandedWidth={EXPANDED_WIDTH}
-          collapsedWidth={COLLAPSED_WIDTH}
-        />
-      )}
-
-      {/* 主内容区域 */}
-      <div
-        className="flex-1 flex flex-col transition-all duration-200 ease-in-out"
-        style={{
-          marginLeft: isLargeScreen && showSidebar ? `${sidebarWidth}px` : 0,
-        }}
-      >
-        {/* 头部 */}
-        {showHeader && (
-          <Header
-            title={title}
-            showSidebarToggle={showSidebar}
-            onSidebarToggle={handleMenuClick}
-            onSearchClick={handleSearchClick}
-            showSearch
-            showNotifications
-            showErrors
-            showQuickSettings
-            showUserMenu
+        {/* 侧边栏 */}
+        {showSidebar && (
+          <SidebarIsland
+            collapsed={sidebarCollapsed}
+            onCollapsedChange={setSidebarCollapsed}
+            mobileOpen={mobileMenuOpen}
+            onMobileClose={() => setMobileMenuOpen(false)}
+            expandedWidth={EXPANDED_WIDTH}
+            collapsedWidth={COLLAPSED_WIDTH}
           />
         )}
 
-        {/* 主内容 - 可滚动 */}
-        <main className="flex-1 overflow-y-auto flex flex-col">
-          <div className="flex-1 py-6 px-4 md:px-6">
-            {children}
-          </div>
-          {/* 页脚 - 在滚动区域内，但始终在内容底部 */}
-          {showFooter && <AdminFooter className="mt-auto flex-shrink-0" />}
-        </main>
+        {/* 主内容区域 */}
+        <div
+          className="flex-1 flex flex-col transition-all duration-200 ease-in-out"
+          style={{
+            marginLeft: isLargeScreen && showSidebar ? `${sidebarWidth}px` : 0,
+          }}
+        >
+          {/* 头部 */}
+          {showHeader && (
+            <Header
+              title={title}
+              showSidebarToggle={showSidebar}
+              onSidebarToggle={handleMenuClick}
+              onSearchClick={handleSearchClick}
+              showSearch
+              showNotifications
+              showErrors
+              showQuickSettings
+              showUserMenu
+            />
+          )}
+
+          {/* 主内容 - 可滚动 */}
+          <main className="flex-1 overflow-y-auto flex flex-col">
+            <div className="flex-1 py-6 px-4 md:px-6">
+              {children}
+            </div>
+            {/* 页脚 - 在滚动区域内，但始终在内容底部 */}
+            {showFooter && <AdminFooter className="mt-auto flex-shrink-0" />}
+          </main>
+        </div>
       </div>
-    </div>
+    </WebSocketProvider>
   );
 };
 
