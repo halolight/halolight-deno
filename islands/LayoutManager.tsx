@@ -146,7 +146,7 @@ const LayoutManager = ({
 
   return (
     <WebSocketProvider
-      autoConnect={true}
+      autoConnect
       onNotification={handleWebSocketNotification}
     >
       <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
