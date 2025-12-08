@@ -29,9 +29,7 @@
     "type": "git",
     "url": "https://github.com/user/halolight-deno.git"
   },
-  "bugs": {
-    "url": "https://github.com/user/halolight-deno/issues"
-  },
+  "bugs": { "url": "https://github.com/user/halolight-deno/issues" },
   "issues": "https://github.com/user/halolight-deno/issues",
   "homepage": "https://halolight-deno.deno.dev",
   "tasks": {
@@ -49,30 +47,11 @@
     "coverage": "deno coverage coverage --lcov > coverage.lcov"
   },
   "lint": {
-    "rules": {
-      "tags": [
-        "fresh",
-        "recommended"
-      ]
-    },
-    "exclude": [
-      "_fresh/",
-      "node_modules/",
-      ".claude/"
-    ]
+    "rules": { "tags": ["fresh", "recommended"] },
+    "exclude": ["_fresh/", "node_modules/", ".claude/"]
   },
-  "fmt": {
-    "exclude": [
-      "_fresh/",
-      "node_modules/",
-      ".claude/"
-    ]
-  },
-  "exclude": [
-    "**/_fresh/*",
-    "**/node_modules/*",
-    "**/.claude/*"
-  ],
+  "fmt": { "exclude": ["_fresh/", "node_modules/", ".claude/"] },
+  "exclude": ["**/_fresh/*", "**/node_modules/*", "**/.claude/*"],
   "imports": {
     "$fresh/": "https://deno.land/x/fresh@1.7.3/",
     "preact": "https://esm.sh/preact@10.22.0",
@@ -87,9 +66,6 @@
     "djwt": "https://deno.land/x/djwt@v3.0.2/mod.ts",
     "$std/": "https://deno.land/std@0.216.0/"
   },
-  "compilerOptions": {
-    "jsx": "react-jsx",
-    "jsxImportSource": "preact"
-  },
+  "compilerOptions": { "jsx": "react-jsx", "jsxImportSource": "preact" },
   "nodeModulesDir": "auto"
 }

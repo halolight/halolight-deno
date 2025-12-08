@@ -78,6 +78,7 @@ import * as $SimpleStateDemo from "./islands/SimpleStateDemo.tsx";
 import * as $StateDemo from "./islands/StateDemo.tsx";
 import * as $StatusDropdown from "./islands/StatusDropdown.tsx";
 import * as $ThemeToggle from "./islands/ThemeToggle.tsx";
+import * as $WebSocketProvider from "./islands/WebSocketProvider.tsx";
 import type { Manifest } from "$fresh/server.ts";
 
 const manifest = {
@@ -162,6 +163,7 @@ const manifest = {
     "./islands/StateDemo.tsx": $StateDemo,
     "./islands/StatusDropdown.tsx": $StatusDropdown,
     "./islands/ThemeToggle.tsx": $ThemeToggle,
+    "./islands/WebSocketProvider.tsx": $WebSocketProvider,
   },
   baseUrl: import.meta.url,
 } satisfies Manifest;
